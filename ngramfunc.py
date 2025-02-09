@@ -41,10 +41,10 @@ def calculate_sequence_log_probability(seq: str, bigram_counts: dict, unigram_co
 '''Main function. Run this.'''
 def get_words_and_seed(desired_length: int = 5):
     bigramCount, unigramCount, wordList = collect_all_words_and_counts(consideration_length=desired_length)
-    wordList = sorted(wordList, key=lambda rw: calculate_sequence_log_probability(seq=rw, 
+    sw = sorted(wordList, key=lambda rw: calculate_sequence_log_probability(seq=rw, 
                                                                                bigram_counts=bigramCount, 
                                                                                unigram_counts=unigramCount))
     # pick a seed from the 20 most common words of that length
-    seed = random.choice(wordList[-20:])
-    wordList.remove(seed)
-    return wordList+[seed]
+    seed = random.choice(sw[-20:])
+    sw.remove(seed)
+    return sw+[seed]

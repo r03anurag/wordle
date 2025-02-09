@@ -33,8 +33,8 @@ def sequence_score(word: str, pc: list):
 '''Main function. Run this'''
 def get_words_and_seed(desired_length: int = 5):
     wl, pc = collect_all_words_and_pcounts(consideration_length=desired_length)
-    wl = sorted(wl, key = lambda wd: sequence_score(word=wd, pc=pc))
+    swl = sorted(wl, key = lambda wd: sequence_score(word=wd, pc=pc))
     # choose a random seed from 20 highest scored words
-    seed = random.choice(wl[-20:])
-    wl.remove(seed)
-    return wl+[seed]
+    seed = random.choice(swl[-20:])
+    swl.remove(seed)
+    return swl+[seed]
