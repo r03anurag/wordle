@@ -4,10 +4,13 @@ from collections import Counter
 import string
 import ngramfunc
 import positional
+import random
 
 '''Class that represents a human Wordle player's game'''
 class HumanPlayerWordle:
     # constructor
+    # self.word_length -> length of word
+    # self.heuristic -> irrelevant for this game; simply for polymorphism purpose. -1.
     # self.answer -> the answer for this round (str)
     # self.progress -> attempts (list of strings) made so far, and information that
     #                  indicates which letters don't exist (~), are misplaced (*), and are correctly placed (+).
@@ -18,11 +21,20 @@ class HumanPlayerWordle:
     # self.attempts -> how many tries are left. initial num. of attempts = ceil(word_length*1.2)
     # self.counts -> counts of each letter in the answer.
     # self.used -> which letters have been used? Dict mapping each letter to a boolean.
-    def __init__(self, answer: str):            
-        self.answer = answer
+    def __init__(self, wordlen: int):  
+        wordlist = []
+        with open("data/words_alpha.txt", "r") as wordsfile:
+            for word in wordsfile:
+                word = word.replace("\n","").upper()
+                if len(word) == wordlen:
+                    wordlist.append(word)
+        self.word_length = wordlen
+        self.heuristic = -1
+        self.answer = random.choice(wordlist)
+        del wordlist
         self.progress = []
-        self.attempts = ceil(len(answer)*1.2)
-        self.counts = Counter(answer)
+        self.attempts = ceil(len(self.answer)*1.2)
+        self.counts = Counter(self.answer)
         self.used = dict()
         for ul in string.ascii_uppercase:
             self.used[ul] = False
@@ -126,6 +138,3 @@ class ComputerPlayerWordle:
             if fb.count("+") == self.word_length:
                 break
             _ = self.process_conditions(fb)
-
-cw = ComputerPlayerWordle(wordlen=5, heur=1)
-cw.run()
