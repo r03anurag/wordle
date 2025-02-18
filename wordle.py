@@ -46,7 +46,7 @@ class HumanPlayerWordle:
             corrects[self.answer[h]] += int(self.answer[h] == guess[h])
         return self.counts - corrects
     
-    # function that evaluates a guess made
+    # function that evaluates a guess made- MAIN
     def evaluate_guess(self, guess: str):
         if self.attempts > 0:
             if guess == self.answer:
@@ -122,7 +122,7 @@ class ComputerPlayerWordle:
         return " and ".join(crt_cond+mis_cond+inc_cond)
 
     # function to process the generated conditions
-    def process_conditions(self, feedback: str):
+    def process_feedback(self, feedback: str):
         cond = self.get_conditions(feedback=feedback)
         self.words = list(filter(lambda word: eval(cond), self.words))
 
@@ -137,4 +137,4 @@ class ComputerPlayerWordle:
             self.progress.append(fb)
             if fb.count("+") == self.word_length:
                 break
-            _ = self.process_conditions(fb)
+            _ = self.process_feedback(fb)

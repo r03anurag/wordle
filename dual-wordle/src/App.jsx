@@ -4,6 +4,11 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+// helper - sleep function
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // helper function - between
 function between(value, min, max) {
   return (value <= max) && (value >= min);
@@ -23,11 +28,29 @@ function is_alpha(s) {
 
 export default function Wordle() {
   const [row, setRow] = useState(0);  // which row are we editing
-  const [letter, setLetter] = useState(0); // which letter position are we editing
+  //const [letter, setLetter] = useState(0); // which letter position are we editing
   const [wordLength, setWordLength] = useState(5); // how long is our word?
   // status of each letter as defined in KeyboardLetter() function
   const [letterStatus, setLetterStatus] = useState(Array(26).fill(0)); 
   const [computerMode, setComputerMode] = useState(false);  // human player (false-default) or computer player (true)?
+  // values of word boxes
+  const [wordValues, setWordValues] = useState(["".padStart(wordLength, "_"),"".padStart(wordLength, "_"),
+                                                "".padStart(wordLength, "_"),"".padStart(wordLength, "_"),
+                                                "".padStart(wordLength, "_"),"".padStart(wordLength, "_"),
+                                                "".padStart(wordLength, "_"),"".padStart(wordLength, "_"),
+                                                "".padStart(wordLength, "_"),"".padStart(wordLength, "_")
+                                              ]);
+  const [wordValuesLoading, setWordValuesLoading] = useState(true);
+  // statuses of the letter boxes
+  const [wordleBoxStatuses, setWordleBoxStatuses] = useState([Array(wordLength).fill(0),Array(wordLength).fill(0),
+                                                              Array(wordLength).fill(0),Array(wordLength).fill(0),
+                                                              Array(wordLength).fill(0),Array(wordLength).fill(0),
+                                                              Array(wordLength).fill(0),Array(wordLength).fill(0),
+                                                              Array(wordLength).fill(0),Array(wordLength).fill(0)
+                                                            ]);
+  const [wordleBoxStatusesLoading, setwordleBoxStatusesLoading] = useState(true);
+  // attempts
+  const [attempts, setAttempts] = useState(0);
   /* if in computer mode, which heuristic is used? (0-default: NGram Probability, 1: Positional Word Count)
     Might add more options in future. Irrelevant if human mode.*/
   const [heur, setHeur] = useState(0);
@@ -36,9 +59,29 @@ export default function Wordle() {
   function getConfig() {
     axios.get("http://localhost:5000/api/config")
          .then((response) => {
-              setWordLength(response.data.wordlength);
-              setComputerMode(response.data.computer);
+              let newWordLength = response.data.wordlength;
+              let cmp = response.data.computer;
+              let seed = response.data.seed;
+              setWordLength(newWordLength);
+              setComputerMode(cmp);
               setHeur(response.data.heuristic);
+              setAttempts(response.data.attempts);
+              setWordValues([seed,"".padStart(newWordLength, "_"),
+                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
+                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
+                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
+                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_")
+                            ]
+              );
+              setWordleBoxStatuses([Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0)
+                                    ]
+              );
+              setWordValuesLoading(false);
+              setwordleBoxStatusesLoading(false);
             }
          )
   }
@@ -48,19 +91,85 @@ export default function Wordle() {
     getConfig();
   }, []);
 
+  // prepare data to be sent to server (for computer mode);
+  function prepareFeedbackForComputer(row_i) {
+    let fb = "";
+    for (let j = 0; j < wordLength; j++) {
+      if (wordleBoxStatuses[row_i][j] == 0) {
+          alert("Invalid status. Please tell me if the letter is correctly placed (green), misplaced (yellow), or incorrect (gray).");
+          return "";
+      } else if (wordleBoxStatuses[row_i][j] == 1) {
+          fb += (wordValues[row_i][j]+"+");
+      } else if (wordleBoxStatuses[row_i][j] == 2) {
+          fb += (wordValues[row_i][j]+"*");
+      } else if (wordleBoxStatuses[row_i][j] == 3) {
+          fb += (wordValues[row_i][j]+"~");
+      }
+    }
+    return fb;
+  }
+
+  // handle processing of feedback string (human mode)
+  function processFeedback(fbs, rown) {
+    if (fbs[0] === "!") {
+      alert(`Attempts over. Answer is ${fbs.slice(1)}`);
+      return;
+    }
+    let vals = JSON.parse(JSON.stringify(wordValues));
+    let wbs = JSON.parse(JSON.stringify(wordleBoxStatuses));
+    setWordValuesLoading(true);
+    setwordleBoxStatusesLoading(true);
+    vals[rown] = "";
+    for (let k = 0; k < fbs.length; k+=2) {
+      vals[rown] += fbs[k];
+      console.log(fbs[k+1])
+      if (fbs[k+1] === "+") {
+          console.log("plus")
+          wbs[rown][k/2] = 1;
+      } else if (fbs[k+1] === "*") {
+          console.log("star")
+          wbs[rown][k/2] = 2;
+      } else if (fbs[k+1] === "~") {
+          console.log("tilde")
+          wbs[rown][k/2] = 3;
+      }
+    }
+    setWordValues(JSON.parse(JSON.stringify(vals)));
+    setWordleBoxStatuses(JSON.parse(JSON.stringify(wbs)));
+    setWordValuesLoading(false);
+    setwordleBoxStatusesLoading(false);
+  }
+
+  // handle button presses for the wordle letters
+  function handleWordleBoxPress(box_no, row_) {
+    // background color based on status
+    // 0: not solved (neutral), 1: correct, 2: misplaced, 3: incorrect
+    if (computerMode && row_ == row) {
+      let bxs = JSON.parse(JSON.stringify(wordleBoxStatuses));
+      bxs[row_][box_no] = (bxs[row_][box_no]+1)%4;
+      setWordleBoxStatuses(JSON.parse(JSON.stringify(bxs)));
+    }
+  }
+
   // handle key down for the text input "wordinput"
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
       // send data to server to evaluate
-      let word = document.getElementById("wordinput").value;
-      if (is_alpha(word)) {
-        alert("Enter pressed!");
+      let word = document.getElementById("wordinput").value.toUpperCase();
+      if (is_alpha(word) && word.length == wordLength) {
+        // send data to server
+        axios.post("http://localhost:5000/api/human-feedback", word)
+            .then((response) => 
+                {
+                  processFeedback(response.data, row);
+                  setRow(Math.min(row+1, 10));
+                  setAttempts(Math.max(attempts-1, 10));
+                }
+            )
       } else {
         alert("Invalid word guess. Please enter letters only.");
-        document.getElementById("wordinput").value = "";
       }
-      //alert(document.getElementById("wordinput").value)
-      //document.getElementById("wordinput").value = document.getElementById("wordinput").value + ":)))";
+      document.getElementById("wordinput").value = "";
     } 
   }
 
@@ -68,59 +177,94 @@ export default function Wordle() {
   function handleKeyboardButtonPress(val) {
     let isLetter = between(val.charCodeAt(0), 65, 90);
     if (val === "Enter") {
-      let word = document.getElementById("wordinput").value;
-      if (is_alpha(word)) {
-        alert("wwwww");
+      let word = document.getElementById("wordinput").value.toUpperCase();
+      if (is_alpha(word) && word.length == wordLength && !computerMode) {
         // send data to server
-      }
+        axios.post("http://localhost:5000/api/human-feedback", word)
+            .then((response) => 
+                {
+                  processFeedback(response.data, row);
+                  setRow(Math.min(row+1, 10));
+                  setAttempts(Math.max(attempts-1, 10));
+                }
+            )
+      // computer mode
+      } else if (computerMode) {
+          let fb = prepareFeedbackForComputer(row);
+          if (fb !== "") {
+            axios.post("http://localhost:5000/api/computer-feedback", fb)
+                .then((response) => 
+                    {
+                      if (response.data === 0) {
+                        alert("YAY! I solved the game.");
+                      } else if (response.data === -1) {
+                        alert("Based on the given feedback, there are no words that match your criteria. Please try again.");
+                      } else {
+                          if (row < 10) {
+                            let new_wordVals = JSON.parse(JSON.stringify(wordValues));
+                            let guess = response.data.toUpperCase();
+                            new_wordVals[row+1] = "";
+                            for (let g = 0; g < guess.length; g++) {
+                              new_wordVals[row+1] += guess[g];
+                            }
+                            setWordValues(JSON.parse(JSON.stringify(new_wordVals)));
+                            setRow(Math.min(row+1, 10));
+                          }
+                      }
+                    }
+                )
+            }
+          }
     } else if (val === "Backspace") {
-      let forminputval = document.getElementById("wordinput").value;
-      document.getElementById("wordinput").value = forminputval.slice(0, forminputval.length-1);
+        let forminputval = document.getElementById("wordinput").value;
+        document.getElementById("wordinput").value = forminputval.slice(0, forminputval.length-1);
     } else if (isLetter) {
-      document.getElementById("wordinput").value = document.getElementById("wordinput").value + val;
+        document.getElementById("wordinput").value = document.getElementById("wordinput").value + val;
     }
+    document.getElementById("wordinput").value = "";
   }
-
+  
   return (
     <>
-    <WordleLettersRow values="AREYOUW___" statuses={Array(10).fill(0)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="__________" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br>
-    <WordleLettersRow values="" statuses={Array(6).fill(1)} wordlength={wordLength}></WordleLettersRow><br></br><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[0]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[0]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={0}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[1]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[1]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={1}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[2]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[2]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={2}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[3]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[3]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={3}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[4]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[4]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={4}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[5]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[5]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={5}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[6]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[6]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={6}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[7]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[7]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={7}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[8]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[8]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={8}></WordleLettersRow><br></br>
+    <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[9]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[9]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={9}></WordleLettersRow><br></br><br></br>
+    <p>Attempts left: {!computerMode? attempts: "N/A"}</p>
     <label hidden={computerMode} htmlFor="wordinput">Enter your guess here:  </label>
     <input id="wordinput" hidden={computerMode} onKeyDown={handleKeyDown}></input><br></br><br></br>
-    <Keyboard lstatuses={letterStatus} keyClickHandler={handleKeyboardButtonPress} kvisible={!computerMode}></Keyboard>
+    <Keyboard lstatuses={letterStatus} keyClickHandler={handleKeyboardButtonPress} kvisible={true}></Keyboard>
     </>
   )
   
 }
 
 // row of wordle letters (size 10)
-function WordleLettersRow({values, statuses, wordlength}) {
+function WordleLettersRow({values, statuses, wordlength, bxsetter, nrow}) {
   return (
   <>
-  <WordleLetterBox value={values[0]} status={statuses[0]} visible={wordlength >= 1}></WordleLetterBox>
-  <WordleLetterBox value={values[1]} status={statuses[1]} visible={wordlength >= 2}></WordleLetterBox>
-  <WordleLetterBox value={values[2]} status={statuses[2]} visible={wordlength >= 3}></WordleLetterBox>
-  <WordleLetterBox value={values[3]} status={statuses[3]} visible={wordlength >= 4}></WordleLetterBox>
-  <WordleLetterBox value={values[4]} status={statuses[4]} visible={wordlength >= 5}></WordleLetterBox>
-  <WordleLetterBox value={values[5]} status={statuses[5]} visible={wordlength >= 6}></WordleLetterBox>
-  <WordleLetterBox value={values[6]} status={statuses[6]} visible={wordlength >= 7}></WordleLetterBox>
-  <WordleLetterBox value={values[7]} status={statuses[7]} visible={wordlength >= 8}></WordleLetterBox>
-  <WordleLetterBox value={values[8]} status={statuses[8]} visible={wordlength >= 9}></WordleLetterBox>
-  <WordleLetterBox value={values[9]} status={statuses[9]} visible={wordlength == 10}></WordleLetterBox>
+  <WordleLetterBox value={values[0]} status={statuses[0]} visible={wordlength >= 1} handleWLBClick={() => bxsetter(0,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[1]} status={statuses[1]} visible={wordlength >= 2} handleWLBClick={() => bxsetter(1,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[2]} status={statuses[2]} visible={wordlength >= 3} handleWLBClick={() => bxsetter(2,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[3]} status={statuses[3]} visible={wordlength >= 4} handleWLBClick={() => bxsetter(3,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[4]} status={statuses[4]} visible={wordlength >= 5} handleWLBClick={() => bxsetter(4,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[5]} status={statuses[5]} visible={wordlength >= 6} handleWLBClick={() => bxsetter(5,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[6]} status={statuses[6]} visible={wordlength >= 7} handleWLBClick={() => bxsetter(6,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[7]} status={statuses[7]} visible={wordlength >= 8} handleWLBClick={() => bxsetter(7,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[8]} status={statuses[8]} visible={wordlength >= 9} handleWLBClick={() => bxsetter(8,nrow)}></WordleLetterBox>
+  <WordleLetterBox value={values[9]} status={statuses[9]} visible={wordlength == 10} handleWLBClick={() => bxsetter(9,nrow)}></WordleLetterBox>
   </>
   )
 }
 
 // blocks to hold typed (game) letters
-function WordleLetterBox({value, status, visible}) {
+function WordleLetterBox({value, status, visible, handleWLBClick}) {
   // background color based on status
   // 0: not solved (neutral), 1: correct, 2: misplaced, 3: incorrect
   let wh = 75;
@@ -137,7 +281,7 @@ function WordleLetterBox({value, status, visible}) {
   } else if (status == 3) {
     bc["backgroundColor"] = "#545454";
   }
-  return <button style={bc}>{value}</button>
+  return <button onClick={handleWLBClick} style={bc}>{value}</button>
 }
 
 // keyboard
