@@ -1,14 +1,14 @@
 ########## file responsible for reading the english words dictionary, and training an N-Gram (bigram)
 #          character-level model on it with probabilities
-########## Word list credits: https://github.com/dwyl/english-words/tree/master
 from nltk.util import ngrams
 from collections import Counter
 from math import log, inf
 import random
+import wordle_config
 
 '''Function that reads dictionary and collects counts'''
 def collect_all_words_and_counts(consideration_length: int):
-    datapath = "data/words_alpha.txt"
+    datapath = wordle_config.DATA
     words = []
     bigram_counts = Counter()
     unigram_counts = Counter()

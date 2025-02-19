@@ -5,6 +5,7 @@ import string
 import ngramfunc
 import positional
 import random
+import wordle_config
 
 '''Class that represents a human Wordle player's game'''
 class HumanPlayerWordle:
@@ -23,7 +24,7 @@ class HumanPlayerWordle:
     # self.used -> which letters have been used? Dict mapping each letter to a boolean.
     def __init__(self, wordlen: int):  
         wordlist = []
-        with open("data/words_alpha.txt", "r") as wordsfile:
+        with open(wordle_config.DATA, "r") as wordsfile:
             for word in wordsfile:
                 word = word.replace("\n","").upper()
                 if len(word) == wordlen:

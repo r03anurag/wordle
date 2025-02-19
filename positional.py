@@ -1,13 +1,13 @@
 ######### file responsible for reading the dictionary, and keeping counts of common letters
 #         for each position, ordered from least common to most common.
-########## Word list credits: https://github.com/dwyl/english-words/tree/master
 ########## Idea Credits: https://medium.com/codex/building-a-wordle-solver-with-python-77e3c2388d63
 from collections import Counter
 import random
+import wordle_config
 
 '''Function that reads dictionary and records letter counts at positions'''
 def collect_all_words_and_pcounts(consideration_length: int):
-    datapath = "data/words_alpha.txt"
+    datapath = wordle_config.DATA
     pos_counts = []
     words = []
     for _ in range(10):
