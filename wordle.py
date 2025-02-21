@@ -1,7 +1,6 @@
 ####### file that implements necessary function for wordle gameplay
 from math import ceil
 from collections import Counter
-import string
 import ngramfunc
 import positional
 import random
@@ -21,7 +20,6 @@ class HumanPlayerWordle:
     #                       - U, D don't exist in the word
     # self.attempts -> how many tries are left. initial num. of attempts = ceil(word_length*1.2)
     # self.counts -> counts of each letter in the answer.
-    # self.used -> which letters have been used? Dict mapping each letter to a boolean.
     def __init__(self, wordlen: int):  
         wordlist = []
         with open(wordle_config.DATA, "r") as wordsfile:
@@ -36,9 +34,6 @@ class HumanPlayerWordle:
         self.progress = []
         self.attempts = ceil(len(self.answer)*1.2)
         self.counts = Counter(self.answer)
-        self.used = dict()
-        for ul in string.ascii_uppercase:
-            self.used[ul] = False
 
     # helper function to calculate margin of error for *
     def calculate_margin_of_error(self, guess: str):
@@ -50,8 +45,6 @@ class HumanPlayerWordle:
     # function that evaluates a guess made- MAIN
     def evaluate_guess(self, guess: str):
         if self.attempts > 0:
-            if guess == self.answer:
-                return self.answer
             info = ["" for _ in range(len(self.answer))]
             margin = self.calculate_margin_of_error(guess=guess)
             for i in range(len(guess)):
@@ -65,11 +58,11 @@ class HumanPlayerWordle:
                         info[i] = guess[i]+"~"
                 else:
                     info[i] = guess[i]+"~"
-                self.used[guess[i]] = True
             self.attempts -= 1
             infoStr = "".join(info)
             self.progress.append(infoStr)
-            return infoStr
+            ext = "." if guess == self.answer else ""
+            return infoStr+ext
         # (!) indicates that answer is returned, but because attempts are over
         return "!"+self.answer
 

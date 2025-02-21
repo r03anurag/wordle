@@ -117,27 +117,32 @@ export default function Wordle() {
     }
     let vals = JSON.parse(JSON.stringify(wordValues));
     let wbs = JSON.parse(JSON.stringify(wordleBoxStatuses));
+    let ls = JSON.parse(JSON.stringify(letterStatus));
     setWordValuesLoading(true);
     setwordleBoxStatusesLoading(true);
     vals[rown] = "";
     for (let k = 0; k < fbs.length; k+=2) {
       vals[rown] += fbs[k];
-      console.log(fbs[k+1])
+      let thisStat;
       if (fbs[k+1] === "+") {
-          console.log("plus")
-          wbs[rown][k/2] = 1;
+        thisStat = 1;
       } else if (fbs[k+1] === "*") {
-          console.log("star")
-          wbs[rown][k/2] = 2;
+        thisStat = 2;
       } else if (fbs[k+1] === "~") {
-          console.log("tilde")
-          wbs[rown][k/2] = 3;
+        thisStat = 3;
       }
+      wbs[rown][k/2] = thisStat;
+      ls[fbs[k].charCodeAt(0)-65] = thisStat;
     }
     setWordValues(JSON.parse(JSON.stringify(vals)));
     setWordleBoxStatuses(JSON.parse(JSON.stringify(wbs)));
+    setLetterStatus(JSON.parse(JSON.stringify(ls)));
     setWordValuesLoading(false);
     setwordleBoxStatusesLoading(false);
+    if (fbs[fbs.length-1] === ".") {
+      alert("Nice job!");
+      return;
+    }
   }
 
   // handle button presses for the wordle letters
@@ -163,7 +168,7 @@ export default function Wordle() {
                 {
                   processFeedback(response.data, row);
                   setRow(Math.min(row+1, 10));
-                  setAttempts(Math.max(attempts-1, 10));
+                  setAttempts(Math.max(attempts-1, 0));
                 }
             )
       } else {
@@ -185,7 +190,7 @@ export default function Wordle() {
                 {
                   processFeedback(response.data, row);
                   setRow(Math.min(row+1, 10));
-                  setAttempts(Math.max(attempts-1, 10));
+                  setAttempts(Math.max(attempts-1, 0));
                 }
             )
       // computer mode
