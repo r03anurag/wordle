@@ -62,7 +62,7 @@ def load():
             seed = "_"*wordle_config.WORDLENGTH
         data = {"row": 0, "wordLength": game.word_length, "letterStatus": [0]*26,"computerMode": wordle_config.COMPUTER_MODE, 
                 "attempts": game.attempts, "heuristic": game.heuristic}
-        data["wordValues"] = [seed]+(["_"*game.word_length-1]*10)
+        data["wordValues"] = [seed]+(["_"*(game.word_length-1)]*10)
         data["wordleBoxStatuses"] = [[0]*game.word_length]*10
         if not os.path.exists("user-data/"):
             os.mkdir("user-data/")
