@@ -31,9 +31,9 @@ class HumanPlayerWordle:
         self.heuristic = -1
         self.answer = random.choice(wordlist)
         del wordlist
-        self.progress = []
         self.attempts = ceil(len(self.answer)*1.2)
         self.counts = Counter(self.answer)
+        self.solved = False
 
     # helper function to calculate margin of error for *
     def calculate_margin_of_error(self, guess: str):
@@ -44,7 +44,7 @@ class HumanPlayerWordle:
     
     # function that evaluates a guess made- MAIN
     def evaluate_guess(self, guess: str):
-        if self.attempts > 0:
+        if not self.solved and self.attempts > 0:
             info = ["" for _ in range(len(self.answer))]
             margin = self.calculate_margin_of_error(guess=guess)
             for i in range(len(guess)):
@@ -60,7 +60,6 @@ class HumanPlayerWordle:
                     info[i] = guess[i]+"~"
             self.attempts -= 1
             infoStr = "".join(info)
-            self.progress.append(infoStr)
             ext = "." if guess == self.answer else ""
             return infoStr+ext
         # (!) indicates that answer is returned, but because attempts are over
@@ -81,12 +80,12 @@ class ComputerPlayerWordle:
     # self.heuristic -> how to score words. [0: bigram-log-probabilities (default), 1: positional-scores]
     # self.words -> list of dictionary words sorted by their log-probabilities/positional-scores in ascending order.
     def __init__(self, wordlen: int, heur: int = 0):
-        self.progress = []
         self.word_length = wordlen
         self.attempts = ceil(wordlen*1.2)
         self.heuristic = heur
         self.words = ngramfunc.get_words_and_seed(desired_length=wordlen) if self.heuristic == 0 \
                         else positional.get_words_and_seed(desired_length=wordlen)
+        self.solved = False
     
     # function to get user feedback for a guess. Only needed if using command-line
     def get_user_feedback_CLI(self, guess: str):
@@ -128,7 +127,6 @@ class ComputerPlayerWordle:
                 break
             guess = self.words.pop()
             fb = self.get_user_feedback_CLI(guess=guess)
-            self.progress.append(fb)
             if fb.count("+") == self.word_length:
                 break
             _ = self.process_feedback(fb)

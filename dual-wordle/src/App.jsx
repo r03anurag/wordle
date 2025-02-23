@@ -56,40 +56,67 @@ export default function Wordle() {
   const [heur, setHeur] = useState(0);
 
   // get configuration data
-  function getConfig() {
-    axios.get("http://localhost:5000/api/config")
+  function loadSaved() {
+    axios.get("http://localhost:5000/api/load")
          .then((response) => {
-              let newWordLength = response.data.wordlength;
-              let cmp = response.data.computer;
-              let seed = response.data.seed;
-              setWordLength(newWordLength);
-              setComputerMode(cmp);
+              setWordLength(response.data.wordLength);
+              setComputerMode(response.data.computerMode);
               setHeur(response.data.heuristic);
               setAttempts(response.data.attempts);
-              setWordValues([seed,"".padStart(newWordLength, "_"),
-                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
-                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
-                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
-                              "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_")
-                            ]
-              );
-              setWordleBoxStatuses([Array(newWordLength).fill(0),Array(newWordLength).fill(0),
-                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0),
-                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0),
-                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0),
-                                    Array(newWordLength).fill(0),Array(newWordLength).fill(0)
-                                    ]
-              );
+              setWordValues(response.data.wordValues);
+              setWordleBoxStatuses(response.data.wordleBoxStatuses);
+              setRow(response.data.row);
+              setLetterStatus(response.data.letterStatus);
               setWordValuesLoading(false);
               setwordleBoxStatusesLoading(false);
             }
          )
   }
 
-  // fetch config only once
+  // load only on refresh or start
   useEffect(() => {
-    getConfig();
+    loadSaved();
   }, []);
+
+  // save user data
+  function saveData() {
+    let data = {"row": row, "wordLength": wordLength, "letterStatus": letterStatus, 
+                "computerMode": computerMode, "wordValues": wordValues, 
+                "wordleBoxStatuses": wordleBoxStatuses, "attempts": attempts, "heuristic": heur};
+    axios.post("http://localhost:5000/api/save", data);
+  }
+
+  // get new game
+  function getNew() {
+    axios.get("http://localhost:5000/api/new")
+         .then((response) => {
+            let newWordLength = response.data.wordLength;
+            let cmp = response.data.computerMode;
+            let seed = response.data.seed;
+            setWordLength(newWordLength);
+            setComputerMode(cmp);
+            setHeur(response.data.heuristic);
+            setAttempts(response.data.attempts);
+            setLetterStatus(Array(26).fill(0));
+            setWordValues([seed,"".padStart(newWordLength, "_"),
+                            "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
+                            "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
+                            "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_"),
+                            "".padStart(newWordLength, "_"),"".padStart(newWordLength, "_")
+                          ]
+            );
+            setWordleBoxStatuses([Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                  Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                  Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                  Array(newWordLength).fill(0),Array(newWordLength).fill(0),
+                                  Array(newWordLength).fill(0),Array(newWordLength).fill(0)
+                                  ]
+            );
+            setWordValuesLoading(false);
+            setwordleBoxStatusesLoading(false);
+         }
+        )
+  }
 
   // prepare data to be sent to server (for computer mode);
   function prepareFeedbackForComputer(row_i) {
@@ -111,6 +138,11 @@ export default function Wordle() {
 
   // handle processing of feedback string (human mode)
   function processFeedback(fbs, rown) {
+    let solvedFlag = false;
+    if (fbs[fbs.length-1] === ".") {
+      solvedFlag = true;
+      fbs = fbs.slice(0, fbs.length-1);
+    }
     if (fbs[0] === "!") {
       alert(`Attempts over. Answer is ${fbs.slice(1)}`);
       return;
@@ -139,7 +171,7 @@ export default function Wordle() {
     setLetterStatus(JSON.parse(JSON.stringify(ls)));
     setWordValuesLoading(false);
     setwordleBoxStatusesLoading(false);
-    if (fbs[fbs.length-1] === ".") {
+    if (solvedFlag) {
       alert("Nice job!");
       return;
     }
@@ -166,9 +198,11 @@ export default function Wordle() {
         axios.post("http://localhost:5000/api/human-feedback", word)
             .then((response) => 
                 {
-                  processFeedback(response.data, row);
-                  setRow(Math.min(row+1, 10));
-                  setAttempts(Math.max(attempts-1, 0));
+                  if (response.data !== "") {
+                    processFeedback(response.data, row);
+                    setRow(Math.min(row+1, 10));
+                    setAttempts(Math.max(attempts-1, 0));
+                  }
                 }
             )
       } else {
@@ -188,9 +222,11 @@ export default function Wordle() {
         axios.post("http://localhost:5000/api/human-feedback", word)
             .then((response) => 
                 {
-                  processFeedback(response.data, row);
-                  setRow(Math.min(row+1, 10));
-                  setAttempts(Math.max(attempts-1, 0));
+                  if (response.data !== "") {
+                    processFeedback(response.data, row);
+                    setRow(Math.min(row+1, 10));
+                    setAttempts(Math.max(attempts-1, 0));
+                  }
                 }
             )
       // computer mode
@@ -245,6 +281,8 @@ export default function Wordle() {
     <label hidden={computerMode} htmlFor="wordinput">Enter your guess here:  </label>
     <input id="wordinput" hidden={computerMode} onKeyDown={handleKeyDown}></input><br></br><br></br>
     <Keyboard lstatuses={letterStatus} keyClickHandler={handleKeyboardButtonPress} kvisible={true}></Keyboard>
+    <button onClick={saveData} style={{backgroundColor: "black", color: "white", fontWeight: "bold"}}>Save</button>
+    <button onClick={getNew} style={{backgroundColor: "gray", color: "white", fontWeight: "bold"}}>New Game</button>
     </>
   )
   
