@@ -61,8 +61,8 @@ def load():
             game = wordle.HumanPlayerWordle(wordlen=wordle_config.WORDLENGTH if wordle_config.WORDLENGTH in wordlen_range else wordlen_default)
             seed = "_"*wordle_config.WORDLENGTH
         data = {"row": 0, "wordLength": game.word_length, "letterStatus": [0]*26,"computerMode": wordle_config.COMPUTER_MODE, 
-                "attempts": game.attempts, "seed": seed, "heuristic": game.heuristic}
-        data["wordValues"] = ["_"*game.word_length]*10
+                "attempts": game.attempts, "heuristic": game.heuristic}
+        data["wordValues"] = [seed]+(["_"*game.word_length-1]*10)
         data["wordleBoxStatuses"] = [[0]*game.word_length]*10
         if not os.path.exists("user-data/"):
             os.mkdir("user-data/")
