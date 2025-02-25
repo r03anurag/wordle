@@ -31,13 +31,13 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
 ## Configuring game settings
 * Navigate to the file `wordle_config.py` in the main directory. The following are parameters:
     - `WORDLENGTH`: Length of the word. Must be between 5 and 8 (otherwise system will default to 5).
-    - `COMPUTER_MODE`: Set to True if the computer is playing the game, or leave False if you want to be the player.
-    - `HEURISTIC`: If the computer is playing the game, how should it rank relevant words? Choices are (currently) 0 or 1.
+    - `COMPUTER_MODE`: Set to True if the computer is playing the game, or leave False (default) if you want to be the player.
+    - `HEURISTIC`: If the computer is playing the game, how should it rank relevant words? Choices are (currently) 0 (default) or 1.
         - 0: Bigram Probabilities (probability of seeing pairs of letters in a specific order, e.g. "CA", "PR")
         - 1: Positional Letter Counts (how often does a letter occur at a specific position in a word, e.g. how often
              is "G" the third letter in 5-letter words?)
     - `DATA`: A path to a file that contains a dictionary of words. Look into the `data/` sub-folder to see current data
-              files. NOTE: File name `WORDS` can be used ONLY for FIVE-LETTER WORDS. For other lengths, use `words_alpha.txt`.
+              files. NOTE: File name `WORDS` can be used ONLY for FIVE-LETTER WORDS. For other lengths, use `words_alpha.txt` (default).
               Attempting to use `WORDS` dataset for longer words will result in errors.
 
 # Authors
