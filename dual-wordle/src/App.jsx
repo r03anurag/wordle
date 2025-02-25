@@ -267,6 +267,7 @@ export default function Wordle() {
   
   return (
     <>
+    <h1>Welcome to dual wordle!</h1>
     <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[0]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[0]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={0}></WordleLettersRow><br></br>
     <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[1]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[1]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={1}></WordleLettersRow><br></br>
     <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[2]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[2]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={2}></WordleLettersRow><br></br>
