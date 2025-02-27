@@ -4,11 +4,6 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
-// helper - sleep function
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 // helper function - between
 function between(value, min, max) {
   return (value <= max) && (value >= min);
@@ -40,6 +35,7 @@ export default function Wordle() {
                                                 "".padStart(wordLength, "_"),"".padStart(wordLength, "_"),
                                                 "".padStart(wordLength, "_"),"".padStart(wordLength, "_")
                                               ]);
+                                              console.log(wordValues)
   const [wordValuesLoading, setWordValuesLoading] = useState(true);
   // statuses of the letter boxes
   const [wordleBoxStatuses, setWordleBoxStatuses] = useState([Array(wordLength).fill(0),Array(wordLength).fill(0),
@@ -215,6 +211,7 @@ export default function Wordle() {
   // handle keyboard button press
   function handleKeyboardButtonPress(val) {
     let isLetter = between(val.charCodeAt(0), 65, 90);
+    console.log(isLetter)
     if (val === "Enter") {
       let word = document.getElementById("wordinput").value.toUpperCase();
       if (is_alpha(word) && word.length == wordLength && !computerMode) {
@@ -229,6 +226,8 @@ export default function Wordle() {
                   }
                 }
             )
+        // clear text field
+        document.getElementById("wordinput").value = "";
       // computer mode
       } else if (computerMode) {
           let fb = prepareFeedbackForComputer(row);
@@ -261,13 +260,19 @@ export default function Wordle() {
         document.getElementById("wordinput").value = forminputval.slice(0, forminputval.length-1);
     } else if (isLetter) {
         document.getElementById("wordinput").value = document.getElementById("wordinput").value + val;
+    } else {
+        document.getElementById("wordinput").value = "";
     }
-    document.getElementById("wordinput").value = "";
   }
-  
+
   return (
     <>
-    <h1>Welcome to dual wordle!</h1>
+    <h1>Welcome to Dual <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a>!</h1>
+    <h3>Wordle is a game in which one is tasked with
+        guessing a five-letter word in a limited number of attempts. I aded my own twist to this and expanded its scope to longer words
+        upto length 8, as well as having the option to designate the computer as the player instead. Hopefully, you enjoy this slight twist!
+        Be sure to check out the actual game with the link provided in the title (highlighted in blue).
+    </h3>
     <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[0]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[0]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={0}></WordleLettersRow><br></br>
     <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[1]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[1]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={1}></WordleLettersRow><br></br>
     <WordleLettersRow values={wordValuesLoading ? "".padStart(wordLength, "_"): wordValues[2]} statuses={wordleBoxStatusesLoading ? "".padStart(wordLength, "_"): wordleBoxStatuses[2]} wordlength={wordLength} bxsetter={handleWordleBoxPress} nrow={2}></WordleLettersRow><br></br>
