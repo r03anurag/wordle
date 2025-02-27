@@ -44,6 +44,9 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
 * Anurag Renduchintala.
 
 # Versions
+* 2/26/2025
+    * Bug fix
+    * Added note on UI.
 * 2/24/2025
     * Initial release.
 
