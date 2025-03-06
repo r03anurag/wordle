@@ -211,7 +211,6 @@ export default function Wordle() {
   // handle keyboard button press
   function handleKeyboardButtonPress(val) {
     let isLetter = between(val.charCodeAt(0), 65, 90);
-    console.log(isLetter)
     if (val === "Enter") {
       let word = document.getElementById("wordinput").value.toUpperCase();
       if (is_alpha(word) && word.length == wordLength && !computerMode) {

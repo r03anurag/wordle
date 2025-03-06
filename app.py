@@ -85,6 +85,8 @@ def receive_human_feedback():
 '''Route to receive feedback from the human'''
 @flask_app.route("/api/computer-feedback", methods=["POST"])
 def make_next_guess():
+    if game.solved:
+        return "0"
     if not game.solved:
         fb = request.get_data()
         fb = fb.decode()
