@@ -24,7 +24,6 @@ lerna-debug.log*
 *.sw?
 __pycache__
 
-dual-wordle/src/assets/
 
 tst.txt
 user-data/
