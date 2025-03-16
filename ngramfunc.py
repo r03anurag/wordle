@@ -45,6 +45,11 @@ def get_words_and_seed(desired_length: int = 5):
                                                                                bigram_counts=bigramCount, 
                                                                                unigram_counts=unigramCount))
     # pick a seed from the n most common words of that length (now a config variable)
-    seed = random.choice(sw[-wordle_config.SCOPE:])
+    try:
+        scope = int(wordle_config.SCOPE)
+        scope = max((1, scope))
+    except:
+        scope = 20
+    seed = random.choice(sw[-scope:])
     sw.remove(seed)
     return sw+[seed]

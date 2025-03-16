@@ -39,12 +39,16 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
     - `DATA`: A path to a file that contains a dictionary of words. Look into the `data/` sub-folder to see current data
               files. NOTE: File name `WORDS` can be used ONLY for FIVE-LETTER WORDS. For other lengths, use `words_alpha.txt` (default).
               Attempting to use `WORDS` dataset for longer words will result in errors.
+    - `SCOPE`: A number that determines how many top word choices to consider when selecting a seed word? 
+               Must be an integer, and the minimum is 1. Default 20.
 * To change game settings: Edit `wordle_config.py`, restart backend (Ctrl+C plus `flask run`).
 
 # Authors
 * Anurag Renduchintala.
 
 # Versions
+* 3/16/2025:
+    * New parameter added in config file
 * 3/8/2025
     * Small .gitignore error fix
     * Added some info to README

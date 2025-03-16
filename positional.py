@@ -35,6 +35,11 @@ def get_words_and_seed(desired_length: int = 5):
     wl, pc = collect_all_words_and_pcounts(consideration_length=desired_length)
     swl = sorted(wl, key = lambda wd: sequence_score(word=wd, pc=pc))
     # choose a random seed from n highest scored words (now a config variable)
-    seed = random.choice(swl[-wordle_config.SCOPE:])
+    try:
+        scope = int(wordle_config.SCOPE)
+        scope = max((1, scope))
+    except:
+        scope = 20
+    seed = random.choice(swl[-scope:])
     swl.remove(seed)
     return swl+[seed]
