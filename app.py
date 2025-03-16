@@ -17,19 +17,6 @@ wordlen_default = 5
 gheur = f",heur=wordle_config.HEURISTIC if wordle_config.HEURISTIC in {heur_range} else {heur_default})" if wordle_config.COMPUTER_MODE else ")"
 game = eval(f"wordle.{gtype}PlayerWordle(wordlen=wordle_config.WORDLENGTH if wordle_config.WORDLENGTH in {wordlen_range} else {wordlen_default}{gheur}")
 
-#print(game)
-# print(game.attempts)
-# '''Route to get the desired user config'''
-# @flask_app.route("/api/config", methods=["GET"])
-# def config():
-#     if wordle_config.COMPUTER_MODE:
-#         last = game.words.pop()
-#         return jsonify({"wordlength": game.word_length, "computer": bool(wordle_config.COMPUTER_MODE), 
-#                         "heuristic": game.heuristic, "attempts": game.attempts, "seed": last.upper()})
-#     else:
-#         return jsonify({"wordlength": game.word_length, "computer": bool(wordle_config.COMPUTER_MODE), 
-#                         "heuristic": game.heuristic, "attempts": game.attempts, "seed": "_"*wordle_config.WORDLENGTH})
-
 '''Route to load a saved game (default when starting app)'''
 @flask_app.route("/api/load", methods=["GET"])
 def load():

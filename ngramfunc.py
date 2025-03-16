@@ -44,7 +44,7 @@ def get_words_and_seed(desired_length: int = 5):
     sw = sorted(wordList, key=lambda rw: calculate_sequence_log_probability(seq=rw, 
                                                                                bigram_counts=bigramCount, 
                                                                                unigram_counts=unigramCount))
-    # pick a seed from the 20 most common words of that length
-    seed = random.choice(sw[-20:])
+    # pick a seed from the n most common words of that length (now a config variable)
+    seed = random.choice(sw[-wordle_config.SCOPE:])
     sw.remove(seed)
     return sw+[seed]

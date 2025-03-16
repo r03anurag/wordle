@@ -34,7 +34,7 @@ def sequence_score(word: str, pc: list):
 def get_words_and_seed(desired_length: int = 5):
     wl, pc = collect_all_words_and_pcounts(consideration_length=desired_length)
     swl = sorted(wl, key = lambda wd: sequence_score(word=wd, pc=pc))
-    # choose a random seed from 20 highest scored words
-    seed = random.choice(swl[-20:])
+    # choose a random seed from n highest scored words (now a config variable)
+    seed = random.choice(swl[-wordle_config.SCOPE:])
     swl.remove(seed)
     return swl+[seed]

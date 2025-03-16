@@ -35,7 +35,6 @@ export default function Wordle() {
                                                 "".padStart(wordLength, "_"),"".padStart(wordLength, "_"),
                                                 "".padStart(wordLength, "_"),"".padStart(wordLength, "_")
                                               ]);
-                                              console.log(wordValues)
   const [wordValuesLoading, setWordValuesLoading] = useState(true);
   // statuses of the letter boxes
   const [wordleBoxStatuses, setWordleBoxStatuses] = useState([Array(wordLength).fill(0),Array(wordLength).fill(0),
@@ -80,6 +79,7 @@ export default function Wordle() {
                 "computerMode": computerMode, "wordValues": wordValues, 
                 "wordleBoxStatuses": wordleBoxStatuses, "attempts": attempts, "heuristic": heur};
     axios.post("http://localhost:5000/api/save", data);
+    alert("Progress saved!");
   }
 
   // get new game
@@ -268,7 +268,7 @@ export default function Wordle() {
     <>
     <h1>Welcome to Dual <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a>!</h1>
     <h3>Wordle is a game in which one is tasked with
-        guessing a five-letter word in a limited number of attempts. I aded my own twist to this and expanded its scope to longer words
+        guessing a five-letter word in a limited number of attempts. I added my own twist to this and expanded its scope to longer words
         upto length 8, as well as having the option to designate the computer as the player instead. Hopefully, you enjoy this slight twist!
         Be sure to check out the actual game with the link provided in the title (highlighted in blue).
     </h3>
