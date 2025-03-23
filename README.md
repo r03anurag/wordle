@@ -46,7 +46,7 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
 * Anurag Renduchintala.
 
 # Versions
-* 3/22/2025
+* 3/23/2025
     * Data selection is now automated, based on word length
     * New parameter added in config file
     * `DATA` parameter removed from config file
