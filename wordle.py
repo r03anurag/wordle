@@ -1,10 +1,8 @@
 ####### file that implements necessary function for wordle gameplay
 from math import ceil
 from collections import Counter
-import ngramfunc
-import positional
+import helper
 import random
-import wordle_config
 
 '''Class that represents a human Wordle player's game'''
 class HumanPlayerWordle:
@@ -21,12 +19,7 @@ class HumanPlayerWordle:
     # self.attempts -> how many tries are left. initial num. of attempts = ceil(word_length*1.2)
     # self.counts -> counts of each letter in the answer.
     def __init__(self, wordlen: int):  
-        wordlist = []
-        with open(wordle_config.DATA, "r") as wordsfile:
-            for word in wordsfile:
-                word = word.replace("\n","").upper()
-                if len(word) == wordlen:
-                    wordlist.append(word)
+        wordlist = helper.collect_words()
         self.word_length = wordlen
         self.heuristic = -1
         self.answer = random.choice(wordlist)
@@ -83,8 +76,8 @@ class ComputerPlayerWordle:
         self.word_length = wordlen
         self.attempts = ceil(wordlen*1.2)
         self.heuristic = heur
-        self.words = ngramfunc.get_words_and_seed(desired_length=wordlen) if self.heuristic == 0 \
-                        else positional.get_words_and_seed(desired_length=wordlen)
+        heurToNum = ["ngramfunc", "positional"]
+        self.words = eval(f"helper.{heurToNum[self.heuristic]}.get_words_and_seed()")
         self.solved = False
     
     # function to get user feedback for a guess. Only needed if using command-line

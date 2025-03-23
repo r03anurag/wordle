@@ -36,9 +36,8 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
         - 0: Bigram Probabilities (probability of seeing pairs of letters in a specific order, e.g. "CA", "PR")
         - 1: Positional Letter Counts (how often does a letter occur at a specific position in a word, e.g. how often
              is "G" the third letter in 5-letter words?)
-    - `DATA`: A path to a file that contains a dictionary of words. Look into the `data/` sub-folder to see current data
-              files. NOTE: File name `WORDS` can be used ONLY for FIVE-LETTER WORDS. For other lengths, use `words_alpha.txt` (default).
-              Attempting to use `WORDS` dataset for longer words will result in errors.
+    - `COMMON_ONLY`: Use only common words when playing the game? Default true 
+                     (You can change this if you want to make life harder for yourself...)
     - `SCOPE`: A number that determines how many top word choices to consider when selecting a seed word? 
                Must be an integer, and the minimum is 1. Default 20.
 * To change game settings: Edit `wordle_config.py`, restart backend (Ctrl+C plus `flask run`).
@@ -47,7 +46,12 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
 * Anurag Renduchintala.
 
 # Versions
-* 3/16/2025:
+* 3/22/2025
+    * Data selection is now automated, based on word length
+    * New parameter added in config file
+    * `DATA` parameter removed from config file
+    * Heuristic implementations are now in `helper.py`. Take a look at this file for details.
+* 3/16/2025
     * New parameter added in config file
 * 3/8/2025
     * Small .gitignore error fix
@@ -62,7 +66,7 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
     * Initial release.
 
 # Acknowledgements
-* Huge text file containing 370,000 English words (`data/words_alpha.txt`); [GitHub](https://github.com/dwyl/english-words/tree/master)
-* Smaller word list of five-letter words (`data/WORDS`); [GitHub-Gist](https://gist.github.com/shmookey/b28e342e1b1756c4700f42f17102c2ff)
+* Huge dictionary of 370,000 English words (`words_alpha.txt`); [GitHub](https://github.com/dwyl/english-words/tree/master)
+* Common and Uncommon words (`commonWords.py` and `uncommonWords.py`); [GitHub](https://github.com/skedwards88/word_lists/tree/main)
 * Positional Letter Count heuristic was originally developed by Jack C. 
   Here is the [article](https://medium.com/codex/building-a-wordle-solver-with-python-77e3c2388d63) from which it was inspired.
