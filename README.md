@@ -46,13 +46,17 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
 * Anurag Renduchintala.
 
 # Versions
+* 3/26/2025
+    * Bug fix in UI that didn't reset row number when new game was requested.
+    * "Invalid word guess" notification is now supported both by pressing "Enter" on keyboard and on the panel of letters.
+    * Check added to make sure that the word guess actually exists.
 * 3/23/2025
     * Data selection is now automated, based on word length
-    * New parameter added in config file
+    * New parameter added in config file (`COMMON_ONLY`)
     * `DATA` parameter removed from config file
     * Heuristic implementations are now in `helper.py`. Take a look at this file for details.
 * 3/16/2025
-    * New parameter added in config file
+    * New parameter added in config file (`SCOPE`)
 * 3/8/2025
     * Small .gitignore error fix
     * Added some info to README

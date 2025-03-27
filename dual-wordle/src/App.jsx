@@ -110,6 +110,7 @@ export default function Wordle() {
             );
             setWordValuesLoading(false);
             setwordleBoxStatusesLoading(false);
+            setRow(0);
          }
         )
   }
@@ -195,14 +196,18 @@ export default function Wordle() {
             .then((response) => 
                 {
                   if (response.data !== "") {
-                    processFeedback(response.data, row);
-                    setRow(Math.min(row+1, 10));
-                    setAttempts(Math.max(attempts-1, 0));
+                    if (response.data == "-2") {
+                      alert("Word not found.");
+                    } else {
+                      processFeedback(response.data, row);
+                      setRow(Math.min(row+1, 10));
+                      setAttempts(Math.max(attempts-1, 0));
+                    }
                   }
                 }
             )
       } else {
-        alert("Invalid word guess. Please enter letters only.");
+        alert("Invalid word guess.");
       }
       document.getElementById("wordinput").value = "";
     } 
@@ -219,12 +224,16 @@ export default function Wordle() {
             .then((response) => 
                 {
                   if (response.data !== "") {
-                    processFeedback(response.data, row);
-                    setRow(Math.min(row+1, 10));
-                    setAttempts(Math.max(attempts-1, 0));
+                    if (response.data == "-2") {
+                      alert("Word not found.");
+                    } else {
+                      processFeedback(response.data, row);
+                      setRow(Math.min(row+1, 10));
+                      setAttempts(Math.max(attempts-1, 0));
+                    }
                   }
                 }
-            )
+            ) 
         // clear text field
         document.getElementById("wordinput").value = "";
       // computer mode
@@ -253,6 +262,8 @@ export default function Wordle() {
                     }
                 )
             }
+          } else {
+            alert("Invalid word guess.");
           }
     } else if (val === "Backspace") {
         let forminputval = document.getElementById("wordinput").value;

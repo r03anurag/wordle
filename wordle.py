@@ -19,11 +19,10 @@ class HumanPlayerWordle:
     # self.attempts -> how many tries are left. initial num. of attempts = ceil(word_length*1.2)
     # self.counts -> counts of each letter in the answer.
     def __init__(self, wordlen: int):  
-        wordlist = helper.collect_words()
+        self.words = helper.collect_words()
         self.word_length = wordlen
         self.heuristic = -1
-        self.answer = random.choice(wordlist)
-        del wordlist
+        self.answer = random.choice(self.words)
         self.attempts = ceil(len(self.answer)*1.2)
         self.counts = Counter(self.answer)
         self.solved = False

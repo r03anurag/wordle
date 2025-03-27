@@ -63,6 +63,8 @@ def receive_human_feedback():
     if not game.solved:
         guess = request.get_data()
         guess = guess.decode()
+        if guess not in game.words:
+            return "-2"
         ev = game.evaluate_guess(guess=guess)
         if ev[-1] == ".":
             game.solved = True
