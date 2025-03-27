@@ -2,7 +2,7 @@
 A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/index.html), in which one is tasked with guessing the word in a limited number of tries. I added my own touch to this by adding the option to have words of length greater than five (between 5 and 8). Additionally, you can switch roles, and have the computer be the player, and you give it feedback.
 
 # Description
-[Wordle](https://www.nytimes.com/games/wordle/index.html) is a New York Times (NYT) game in which one is tasked with guessing the word in a limited number of tries, basd on feedback given. On each guess, the player is told which letters are correctly placed, misplaced, or non-existent in the word. 
+[Wordle](https://www.nytimes.com/games/wordle/index.html) is a New York Times (NYT) game in which one is tasked with guessing the word in a limited number of tries, based on feedback given. On each guess, the player is told which letters are correctly placed, misplaced, or non-existent in the word. 
 
 # Getting Started
 
