@@ -59,9 +59,13 @@ class ngramfunc:
     '''Main function. Run this.'''
     def get_words_and_seed():
         bigramCount, unigramCount, wordList = ngramfunc.collect_counts(collect_words())
-        sw = sorted(wordList, key=lambda rw: ngramfunc.calculate_sequence_log_probability(seq=rw, 
-                                                                                bigram_counts=bigramCount, 
-                                                                                unigram_counts=unigramCount))
+        # heuristic value function
+        def heuristic_value(word: str):
+            hv = ngramfunc.calculate_sequence_log_probability(seq=word,bigram_counts=bigramCount,unigram_counts=unigramCount)
+            uq = len(set(word))/len(word) if bool(wordle_config.UNIQUE) else -1
+            return (hv, uq)
+        # wordlist sorted according to (heuristic, common weight)
+        sw = sorted(wordList, key=heuristic_value)
         # pick a seed from the n most common words of that length (now a config variable)
         try:
             scope = int(wordle_config.SCOPE)
@@ -102,7 +106,13 @@ class positional:
     '''Main function. Run this'''
     def get_words_and_seed():
         wl, pc = positional.collect_pcounts(collect_words())
-        swl = sorted(wl, key = lambda wd: positional.sequence_score(word=wd, pc=pc))
+        # heuristic value function
+        def heuristic_value(word: str):
+            hv = positional.sequence_score(word=word, pc=pc)
+            uq = len(set(word))/len(word) if bool(wordle_config.UNIQUE) else -1
+            return (hv, uq)
+        # sort the word list by heuristic
+        swl = sorted(wl, key=heuristic_value)
         # choose a random seed from n highest scored words (now a config variable)
         try:
             scope = int(wordle_config.SCOPE)

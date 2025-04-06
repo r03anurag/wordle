@@ -38,14 +38,20 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
              is "G" the third letter in 5-letter words?)
     - `COMMON_ONLY`: Use only common words when playing the game? Default true 
                      (You can change this if you want to make life harder for yourself...)
-    - `SCOPE`: A number that determines how many top word choices to consider when selecting a seed word? 
+    - `SCOPE`: If in computer mode, a number that determines how many top word choices to consider when selecting a seed word? 
                Must be an integer, and the minimum is 1. Default 20.
+    - `UNIQUE`: If in computer mode and set to True, the algorithm will prioritize words that have no repeating letters.
+                This can help eliminate more letters and words quickly. Default false.
+                NOTE: This is not a separate heuristic by itself; it is built on top of existing heuristics. As such, 
+                      uniqueness never takes precedence over the heuristic computed for a word.
 * To change game settings: Edit `wordle_config.py`, restart backend (Ctrl+C plus `flask run`).
 
 # Authors
 * Anurag Renduchintala.
 
 # Versions
+* 4/6/2025
+    * `UNIQUE` parameter added.
 * 3/26/2025
     * Bug fix in UI that didn't reset row number when new game was requested.
     * "Invalid word guess" notification is now supported both by pressing "Enter" on keyboard and on the panel of letters.
