@@ -50,6 +50,8 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
 * Anurag Renduchintala.
 
 # Versions
+* 4/10/2025
+    * Two (2) words added to `commonWords.py`.
 * 4/6/2025
     * `UNIQUE` parameter added.
 * 3/26/2025
