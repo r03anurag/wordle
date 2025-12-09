@@ -51,7 +51,7 @@ A web application/game like NYT's [Wordle](https://www.nytimes.com/games/wordle/
 
 # Versions
 * 12/9/2025
-    * Minor change in gitignore file. wordle_config.py will not be pushed to git.
+    * Small change in gitignore file.
 * 4/21/2025
     * Removed unnecessary comments.
 * 4/10/2025

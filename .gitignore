@@ -24,6 +24,4 @@ lerna-debug.log*
 *.sw?
 __pycache__
 
-
-wordle_config.py
 user-data/
