@@ -26,3 +26,4 @@ __pycache__
 
 
 user-data/
+wordle_config.py
